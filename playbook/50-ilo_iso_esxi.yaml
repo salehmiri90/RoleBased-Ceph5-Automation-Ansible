@@ -118,7 +118,7 @@
                       password: "{{ ilo_pass }}"
                       state: "{{ ilo_state }}"
                       media: cdrom
-                      image: http://192.168.255.16/update/{{ item.hostName }}.iso
+                      image: http://salehmiri.local/stageiso/{{ item.hostName }}.iso
               delegate_to: localhost
               with_items:
                       - "{{ esxihosts }}"

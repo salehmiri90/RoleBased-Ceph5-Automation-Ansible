@@ -1,5 +1,5 @@
 #A. run below command to replace each hosts in the mentioned files
-#sed -i 's/kceph2-06/kceph2-07/g' *
+#sed -i 's/ceph2-06/ceph2-07/g' *
 
 #B. check the configs changed
 #grep kceph2 -nr

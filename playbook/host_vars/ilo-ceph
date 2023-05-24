@@ -1,13 +1,14 @@
 ---
 cephhosts:
-  - hostName: bceph2-01
-    bond0_ip: 10.19.75.41
-    bond0slaves1: eno5np0
-    bond0slaves2: eno6np1
-    ilo_ip: 10.115.51.238
+  - hostName: ceph23-01
+    bond0_ip: 1.9.150.11
+    bond0slaves1: ens3np0
+    bond0slaves2: ens4np1
+    ilo_ip: 1.11.5.38
 
-  - hostName: bceph2-02
-    bond0_ip: 10.19.75.42
-    bond0slaves1: eno7np0
-    bond0slaves2: eno8np1
-    ilo_ip: 10.115.51.239
+  - hostName: ceph23-02
+    bond0_ip: 1.9.150.12
+    bond0slaves1: ens7np0
+    bond0slaves2: ens8np1
+    ilo_ip: 1.11.5.39
+

@@ -1,61 +1,17 @@
-### Kazemian Clusters ###
-[kceph1-mons]
-kceph1-mon[1:5]
-[kceph1-dep]
-kceph1-deploy[1:2]
-[kceph1-osds]
-kceph1-0[1:8]
-##
-[kceph2-mons]
-kceph2-mon[1:5]
-[kceph2-osds]
-kceph2-0[1:9]
-kceph2-1[0:2]
-[kceph2-new-osds]
-kceph2-1[3:8]
-##
-[kceph3-mons]
-kceph3-mon[1:5]
-[kceph3-osds]
-kceph3-0[1:9]
-kceph3-1[0:5]
-[kceph3-dep]
-kceph3-deploy[1:2]
-[kceph3-16disk]
-kceph3-0[2:5]
-kceph3-07
-##
-
+### UAE Clusters ###
+[ceph1-mons]
+ceph1-mon[1:5]
+[ceph1-dep]
+ceph1-deploy[1:2]
+[ceph1-osds]
+ceph1-0[1:8]
 
 #######################
-### Tohid Clusters ###
-[tceph3]
-tceph3-0[1:5]
-
-
-#######################
-### Babaei Clusters ###
-[bceph2-mons]
-bceph2-mon[1:5]
-[bceph2-osds]
-bceph2-0[1:9]
-bceph2-1[0:2]
-
-#######################
-### Monitoring ###
-[xoroux]
-xoroux
-######################
-### Test Clusters ###
-[rhel9]
-cephlab0[1:5]
-
-[cube]
-#cube0[1:5]
-[bayan]
-bayan-[1:3]
-[elk]
-elk
+### UK Clusters ###
+[ceph2-mons]
+ceph2-mon[1:5]
+[ceph2-osds]
+ceph2-0[1:9]
 
 ### ILO Provisioning ###
 [ilo-ceph]
@@ -68,28 +24,14 @@ esxi-ilo1
 #########################
 ####### PARENTS #########
 #########################
-### Kazemian Clusters ###
-[kceph1:children]
-kceph1-mons
-kceph1-osds
-kceph1-dep
-##
-[kceph2:children]
-kceph2-mons
-kceph2-osds
-kceph2-new-osds
-##
-[kceph3:children]
-kceph3-mons
-kceph3-osds
-kceph3-dep
+### UAE Clusters ###
+[uae:children]
+ceph1-mons
+ceph1-osds
+ceph1-dep
 
-### Babaei Clusters ###
-[bceph2:children]
-bceph2-mons
-bceph2-osds
-##
-
-### Tohid Clusters ###
-##
+### UK Clusters ###
+[uk:children]
+ceph2-mons
+ceph2-osds
 

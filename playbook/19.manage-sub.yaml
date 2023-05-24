@@ -9,7 +9,7 @@
     block:
             - name: modify hosts /etc/hosts
               shell:
-                      cmd: sudo echo "172.17.53.6     redhat-satellite.mcci.local     redhat-satellite" >> /etc/hosts
+                      cmd: sudo echo "1.71.253.6     satellite.miri.local     satellite" >> /etc/hosts
             - name: unregister
               shell:
                       cmd: subscription-manager unregister
@@ -18,7 +18,7 @@
                       cmd: subscription-manager clean
             - name: remove katello
               shell:
-                      cmd: yum remove -y katello-ca-consumer-satellite.idm.mci.ir-1.0-2.noarch
+                      cmd: yum remove -y katello-ca-consumer-satellite.saleh.miri.local-1.0-2.noarch
     ignore_errors: yes
     tags: delsubs
 

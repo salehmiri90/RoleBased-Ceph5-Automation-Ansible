@@ -49,25 +49,24 @@
               with_fileglob:
                       - /home/ansible/osd_spec/*
     tags: osd
-
 ### SMTP config for MON1------------------------------------------------------------------
   - name: block smtp
     block:
             - name: set alert enable
               shell:
                       cmd: ceph mgr module enable alerts
-  
+
             - name: set SMTP host
               shell:
-                      cmd: ceph config set mgr mgr/alerts/smtp_host "bulkmail.mci.ir" --force
+                      cmd: ceph config set mgr mgr/alerts/smtp_host "bulkmail.miri.local" --force
 
             - name: set SMTP destination
               shell:
-                      cmd: ceph config set mgr mgr/alerts/smtp_destination storage-team@mci.ir
+                      cmd: ceph config set mgr mgr/alerts/smtp_destination saleh@miri.local
 
             - name: set SMTP sender
               shell:
-                      cmd: ceph config set mgr mgr/alerts/smtp_sender {{ clustername }}@noreply.mci.ir
+                      cmd: ceph config set mgr mgr/alerts/smtp_sender {{ clustername }}@noreply.miri.local
 
             - name: set email subject
               shell:
@@ -84,17 +83,18 @@
             - name: Send a test alert
               shell:
                       cmd: ceph alerts send
- 
+
             - name: display messag
               run_once: yes
               debug:
                     msg:
                             - 'Things need to check: '
-                            - '- Plz check your email address: storage-team@mci.ir'
-                            - '- You must recieve an email from {{ clustername }}@noreply.mci.ir' 
+                            - '- Plz check your email address: saleh@miri.local'
+                            - '- You must recieve an email from {{ clustername }}@noreply.miri.local'
                             - '- Email Subject: Ceph Cluster {{ clustername }} '
     tags: smtp
     ignore_errors: yes
 
 
 ...
+

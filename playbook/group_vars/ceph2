@@ -1,0 +1,30 @@
+---
+clustername: ceph2
+mon1_ip: 1.9.7.101 
+####### key info in string type####
+ceph_pub: ssh-rsa AAAAB3NzacsdcsdC1yc2EAAAADAQAcsdcsdcroKJSYc= ceph-34f729e8
+####### osd config ####
+data_disk_qty: 8
+first_disk: 0
+last_disk: 7
+db_disk: 
+wal_size:
+disks:
+  - name: nvme0n1
+    num: 1
+  - name: nvme1n1
+    num: 2
+  - name: nvme2n1
+    num: 3
+  - name: nvme3n1
+    num: 4
+  - name: nvme4n1
+    num: 5
+  - name: nvme5n1
+    num: 6
+  - name: nvme6n1
+    num: 7
+  - name: nvme7n1
+    num: 8
+
+

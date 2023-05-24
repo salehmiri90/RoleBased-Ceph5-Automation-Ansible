@@ -26,9 +26,9 @@
                       content: |
                               lang en_US
                               keyboard us
-                              timezone Asia/Tehran --utc
-                              rootpw --plaintext 'Mci@12345'
-                              user --name=ansible --password='Mci@12345'
+                              timezone Asia/City --utc
+                              rootpw --plaintext 'password'
+                              user --name=ansible --password='password'
                               text
                               cdrom
                               bootloader --location=mbr --append="rhgb nofb quiet splash=quiet crashkernel=auto"
@@ -102,7 +102,7 @@
 
             - name: Deleting all related files except created iso file
               shell: |
-                      #rm -rf /var/deploy/baremetal/{{ item.hostName }}
+                      rm -rf /var/deploy/baremetal/{{ item.hostName }}
                       rm -rf /mnt/*
               with_items:
                       - "{{ cephhosts }}"
@@ -117,7 +117,7 @@
                       password: "{{ ilo_pass }}"
                       state: "{{ ilo_state }}"
                       media: cdrom
-                      image: http://1.1.1.1/iso/{{ item.hostName }}.iso
+                      image: http://salehmiri.local/stageiso/{{ item.hostName }}.iso
               delegate_to: localhost
               with_items:
                       - "{{ cephhosts }}"
