@@ -1,0 +1,16 @@
+---
+- hosts: all
+  # only run inside of mon1
+  # do not run it from ansible server
+  gather_facts: yes
+  become: yes
+  tasks:
+  - name: add hosts
+    block:
+            - name: add hosts
+              shell:
+                      cmd: ceph orch host add {{ hostName }} {{ ip }}
+                      # only run in mon1
+    tags: addhost     
+
+

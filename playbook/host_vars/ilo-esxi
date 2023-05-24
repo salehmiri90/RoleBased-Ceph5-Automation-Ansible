@@ -1,0 +1,9 @@
+---
+esxihosts:
+  - hostName: wo1-srv03.vdi.mci.ir
+    esxi_ip: 10.163.209.29
+    ilo_ip: 10.186.166.19
+
+  - hostName: wo2-srv03.vdi.mci.ir
+    esxi_ip: 10.163.209.30
+    ilo_ip: 10.186.166.20

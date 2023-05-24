@@ -1,0 +1,20 @@
+---
+###### Group Vars for ILO Provisioning ########
+###### ESXI info
+root_password: 'Mci@12345'
+global_vlan_id: 136
+global_netmask: 255.255.255.128
+global_gw: 10.163.209.126
+global_dns1: 10.163.208.1
+global_dns2: 10.163.208.2
+global_ntp1: 10.163.208.4
+global_ntp2: 10.163.208.5
+
+
+###### HPE ILO info
+ilo_user: vdi
+ilo_pass: VDI!QAZ@WSX
+ilo_state: boot_once
+
+###### Path on Remote server (ISO Name)
+src_iso_file: VMware-ESXi-8.0.1.iso

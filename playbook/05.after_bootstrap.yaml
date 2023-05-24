@@ -1,0 +1,48 @@
+####### READ ME #####
+# use --limit to define specific hosts
+# please complete hostvars and groupvars based on cluster
+# run this file after bootstrap
+# run on all MONs 
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+
+### keys #------------------------------------------------------------------------------------
+  - name: keyring
+    block:
+            - name: display message
+              run_once: yes
+              debug:
+                      msg:
+                              - 'You need to put keyring and ceph.conf files in ansible directory'
+                              - '################################################################'
+
+            - name: copy Ceph Keyring to MONs
+              copy:
+                    src: "{{ item }}"
+                    dest: /etc/ceph/
+                    owner: root
+                    group: root
+                    mode: '0644'
+                    remote_src: no
+              with_items:
+                      - /home/ansible/{{ clustername }}/ceph.client.admin.keyring
+                      - /home/ansible/{{ clustername }}/ceph.conf
+    tags: monKeys
+    ignore_errors: yes
+
+  - name: set ssh key on OSDs
+    block:
+            - name: set ssh authorized keys on OSDs
+              authorized_key:
+                      user: root
+                      state: present
+                      key: "{{ ceph_pub }}"
+                      path: /root/.ssh/authorized_keys
+                      manage_dir: yes
+    tags: osdKeys
+    ignore_errors: yes
+
+...

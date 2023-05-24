@@ -1,0 +1,129 @@
+---
+- hosts: ilo-ceph
+  become: yes
+  gather_facts: no
+  vars:
+          - ansible_python_interpreter: /usr/bin/python3
+          - ansible_host_key_checking: no
+          - validate_certs: no
+  tasks:
+  - name: Block Installation Rhel8.6 using ISO file
+    block:
+            - name: Mounting source directory from official Rhel8.6 ISO
+              shell: |
+                      mkdir /mnt/{{ item.hostName }}
+                      mount -o loop -t iso9660 /var/deploy/isosrc/{{ src_iso_file }} /mnt/{{ item.hostName }}/
+                      mkdir /var/deploy/baremetal/{{ item.hostName }}
+                      cp -avRf /mnt/{{ item.hostName }}/* /var/deploy/baremetal/{{ item.hostName }}/
+                      umount /mnt/{{ item.hostName }}
+              with_items:
+                      - "{{ cephhosts }}"
+
+            - name: Creating kickstart file for OSDs with 600GB OS disk space
+              copy:
+                      force: yes
+                      dest: /var/deploy/baremetal/{{ item.hostName }}/KS.CFG
+                      content: |
+                              lang en_US
+                              keyboard us
+                              timezone Asia/Tehran --utc
+                              rootpw --plaintext 'Mci@12345'
+                              user --name=ansible --password='Mci@12345'
+                              text
+                              cdrom
+                              bootloader --location=mbr --append="rhgb nofb quiet splash=quiet crashkernel=auto"
+                              zerombr
+                              clearpart --all --initlabel
+                              ignoredisk --only-use=sda
+                              part pv.01 --fstype="lvmpv" --ondisk=sda --size=79876
+                              part pv.02 --fstype="lvmpv" --ondisk=sda --size=490504
+                              part /boot/efi --fstype="efi" --ondisk=sda --size=600 --fsoptions="umask=0077,shortname=winnt"
+                              part /boot --fstype="xfs" --ondisk=sda --size=1024 
+                              volgroup rhel --pesize=4096 pv.01
+                              volgroup vardata --pesize=4096 pv.02
+                              logvol / --vgname=rhel --name=root --fstype=xfs --size=51200 
+                              logvol swap --vgname=rhel --name=swap --fstype=swap --size=8192 
+                              logvol /home --vgname=rhel --name=home --fstype=xfs --size=20480
+                              logvol /var --vgname=vardata --name=vardata --fstype=xfs --size=490496 
+                              network --device=bond0 --bondslaves={{ item.bond0slaves1 }},{{ item.bond0slaves2 }} --bondopts=mode=802.3ad --hostname={{ item.hostName}} --bootproto=static --ip={{ item.bond0_ip }} --netmask={{ global_netmask }} --gateway={{ global_gw }} --nameserver={{ global_dns1 }},{{ global_dns2 }} --onboot=yes --activate
+                              skipx
+                              firstboot --disable
+                              selinux --enforcing
+                              firewall --enabled --ssh 
+                              %packages
+                              @^minimal-environment
+                              @container-management
+                              @security-tools
+                              telnet
+                              perl
+                              vim
+                              chrony
+                              wget
+                              tzdata
+                              %end
+                              reboot                              
+
+              with_items:
+                      - "{{ cephhosts }}"
+
+            - name: Scripting commands to tarball the kickstart file
+              shell:
+                      cmd: cd /var/deploy/baremetal/{{ item.hostName }}/
+              with_items:
+                      - "{{ cephhosts }}"
+
+            - name: Generate bootable iso from all files
+              shell: >
+                      mkisofs
+                      -o /var/deploy/baremetal/{{ item.hostName }}.iso
+                      -b isolinux/isolinux.bin
+                      -J
+                      -R
+                      -l
+                      -c isolinux/boot.cat
+                      -no-emul-boot
+                      -boot-load-size 4
+                      -boot-info-table
+                      -eltorito-alt-boot
+                      -e images/efiboot.img
+                      -no-emul-boot
+                      -graft-points
+                      -joliet-long
+                      /var/deploy/baremetal/{{ item.hostName }}/
+              with_items:
+                      - "{{ cephhosts }}"
+
+            - name: Move created iso to target path         
+              shell: |
+                      isohybrid --uefi /var/deploy/baremetal/{{ item.hostName }}.iso
+                      mv /var/deploy/baremetal/{{ item.hostName }}.iso /var/deploy/stageiso/
+              with_items:
+                      - "{{ cephhosts }}"
+
+            - name: Deleting all related files except created iso file
+              shell: |
+                      #rm -rf /var/deploy/baremetal/{{ item.hostName }}
+                      rm -rf /mnt/*
+              with_items:
+                      - "{{ cephhosts }}"
+    tags: iso
+
+  - name: Block Using ILO to deploy iso
+    block:
+            - name: Using HPE iLO to {{ ilo_state }} target physical servers
+              hpilo_boot:
+                      host: "{{ item.ilo_ip }}"
+                      login: "{{ ilo_user }}"
+                      password: "{{ ilo_pass }}"
+                      state: "{{ ilo_state }}"
+                      media: cdrom
+                      image: http://1.1.1.1/iso/{{ item.hostName }}.iso
+              delegate_to: localhost
+              with_items:
+                      - "{{ cephhosts }}"
+    tags: ilo
+
+
+
+...
+

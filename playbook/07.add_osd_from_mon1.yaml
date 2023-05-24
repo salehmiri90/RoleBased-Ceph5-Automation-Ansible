@@ -1,0 +1,27 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+  - name: add osd from Mon1 using for script
+    block:
+            - name: copy script file to remote servers
+              copy:
+                    src: /home/ansible/common_config/add_osd_from_mon1.sh
+                    dest: /tmp
+                    remote_src: no
+                    mode: '0744'
+                    owner: root
+                    group: root
+
+            - name: Run Shell
+              shell:
+                      cmd: |
+                              cd /tmp/
+                              ./add_osd_from_mon1.sh
+              register: addosd_output
+
+            - debug:
+                    var: addosd_output.stdout_lines
+
+

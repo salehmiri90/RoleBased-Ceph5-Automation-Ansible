@@ -1,0 +1,35 @@
+[ceph5]
+name = Red Hat Enterprise Linux 8 for x86_64 - CEPH5 (RPMs)
+baseurl = http://172.17.62.241:8081/repository/ceph-5/
+enabled = 1
+gpgcheck = 0
+
+[docker-rpms]
+name = Red Hat Enterprise Linux 8 for x86_64 - Docker (RPMs)
+baseurl = http://172.17.62.241:8081/repository/docker-el8/
+enabled = 0
+gpgcheck = 0
+
+[elastic-rhel8-rpms]
+name = Red Hat Enterprise Linux 8 for x86_64 - Elastic (RPMs)
+baseurl = http://172.17.62.241:8081/repository/elastic-rhel8/
+enabled = 0
+gpgcheck = 0
+
+[pypi-rpms]
+name = Red Hat Enterprise Linux 8 for x86_64 - PYPI (RPMs)
+baseurl = http://172.17.62.241:8081/repository/pypi/
+enabled = 0
+gpgcheck = 0
+
+[Python-rpms]
+name = Red Hat Enterprise Linux 8 for x86_64 - Python (RPMs)
+baseurl = http://172.17.62.241:8081/repository/python/
+enabled = 0
+gpgcheck = 0
+
+[generl-docker-rpms]
+name = Red Hat Enterprise Linux 8 for x86_64 - General Docker (RPMs)
+baseurl = http://172.17.62.241:8081/repository/docker/
+enabled = 0
+gpgcheck = 0

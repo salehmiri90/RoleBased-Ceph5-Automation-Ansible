@@ -1,0 +1,18 @@
+---
+### host info ###
+hostName: bceph2-01
+ip: 
+
+### zabbix agent info ###
+zbx_address: 10.88.0.1
+
+### bondc cluster (interconnect) info ###
+bondc_ipv4: 10.110.11.110/24
+bondc_slave:
+  - connamec: bondc-port1
+    ifnamec: ens2f0np0
+  - connamec: bondc-port2
+    ifnamec: ens2f1np1
+
+### 
+

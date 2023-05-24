@@ -1,0 +1,353 @@
+####### READ ME #####
+# use --limit to define specific hosts
+# please complete hostvars and groupvars based on cluster
+# run this file before bootstrap
+# run on all mons and osds
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+### 00-hostname #-----------------------------------------------------------------
+  - name: Hostname
+    block:
+            - name: set Hostname
+              hostname:
+                      name: "{{ hostName }}"
+    tags: hostname
+
+### 01-ketello #-----------------------------------------------------------------
+  - name: Subscription to redhat
+    block:
+            - debug:
+                    var: hostvars[inventory_hostname]['ansible_default_ipv4']['address']
+            - debug:
+                    var: hostvars[inventory_hostname]['ansible_dns']['nameservers']
+
+            - name: modify hosts /etc/hosts
+              shell:
+                      cmd: sudo echo "172.17.53.6     redhat-satellite.mcci.local     redhat-satellite" >> /etc/hosts
+
+            - name: copy rpm.repo to remote servers
+              copy:
+                      src: /home/ansible/common_config/rpm.repo
+                      dest: /etc/yum.repos.d/
+                      remote_src: no
+                      owner: root
+                      group: root
+                      mode: '0644'
+              tags: rpmrepo
+
+            - name: create ssh login warning message
+              copy:
+                      src: /home/ansible/{{ clustername }}/motd
+                      dest: /etc/motd
+                      remote_src: no
+                      owner: root
+                      group: root
+                      mode: '0644'
+              tags: motd
+
+            - name: install katello rpm
+              shell:
+                      cmd: rpm -Uvh {{ katello_url }}
+
+            - name: subscribe to redhat
+              redhat_subscription:
+                      state: present
+                      org_id: "{{ org_id }}"
+                      activationkey: "{{ activationkey }}"
+              when: ansible_distribution == 'RedHat'
+    ignore_errors: yes
+    tags: subs
+
+### 02-rpm #-----------------------------------------------------------------
+  - name: Initial Packages
+    block:
+            - name: Install Initial {{ basic_packages }} Packages
+              yum:
+                      name: "{{ item }}"
+                      state: latest
+                      update_cache: yes
+              loop: "{{ basic_packages }}"
+    ignore_errors: yes
+    tags: packages
+
+  - name: Ceph Packages
+    block:
+            - name: Install Ceph Packages include {{ ceph_packages }}
+              yum:
+                      name: "{{ item }}"
+                      state: present
+              loop: "{{ ceph_packages }}"
+    ignore_errors: yes
+    tags: ceph
+
+### 03-chrony #-----------------------------------------------------------------
+  - name: Time Packages
+    block:
+            - name: set Timezone Tehran
+              timezone:
+                      name: Asia/Tehran
+            - name: delete chrony old config
+              shell:
+                      cmd: sed -i '/iburst/d' /etc/chrony.conf
+
+            - name: modify chrony file for Babaei Clusters
+              shell:
+                      cmd: sed -i '3 i \server {{ ntp_babaei[0] }} iburst \nserver {{ ntp_babaei[1] }} iburst \n ' /etc/chrony.conf
+              when: ansible_facts['default_ipv4']['gateway'] == "10.19.75.254"
+
+            - name: modify chrony file for Tohid Clusters
+              shell:
+                      cmd: sed -i '3 i \server {{ ntp_tohid[0] }} iburst \nserver {{ ntp_tohid[1] }} iburst \n ' /etc/chrony.conf
+              when: ansible_facts['default_ipv4']['gateway'] == "172.18.27.254"
+
+            - name: modify chrony file for Kazemian Clusters
+              shell:
+                      cmd: sed -i '3 i \server {{ ntp_kazemian[0] }} iburst \nserver {{ ntp_kazemian[1] }} iburst \n ' /etc/chrony.conf
+              when: ansible_facts['default_ipv4']['gateway'] == "10.156.199.254"
+
+    always:
+            - name: restart chrony service
+              service:
+                      name: chronyd
+                      state: restarted
+                      enabled: yes
+    ignore_errors: yes
+    tags: time
+
+### 04 bond for physical servers #-----------------------------------------------------
+  - name: Cluster network (bondc)
+    block:
+            - name: create bondc for cluster (interconnect) network
+              community.general.nmcli:
+                      type: bond
+                      conn_name: bondc
+                      ip4: "{{ bondc_ipv4 }}"
+                      mode: '802.3ad'
+                      state: present
+
+            - name: slave bond cluster
+              community.general.nmcli:
+                      type: bond-slave
+                      conn_name: "{{ item.connamec }}"
+                      ifname: "{{ item.ifnamec }}"
+                      master: 'bondc'
+                      state: present
+              with_items:
+                      - "{{ bondc_slave }}"
+
+            - name: Disable Bondc IPv6
+              shell:
+                      cmd: nmcli connection modify bondc ipv6.method disabled
+
+            - name: set method manual
+              shell:
+                      cmd: nmcli con mod bondc ipv4.method manual
+            - name: ifup bond private
+              shell:
+                      cmd: nmcli con up bondc
+    ignore_errors: yes
+    tags: bondc
+
+### management interface #-------------------------------------------------
+  - name: Interfaces
+    block:
+            - name: Interfaces Onboot Yes
+              replace:
+                      path: /etc/sysconfig/network-scripts/{{ item }}
+                      regexp: '^ONBOOT=no'
+                      replace: 'ONBOOT=yes'
+              with_items:
+                      - ifcfg-bond0
+                      - ifcfg-bondc
+                      - ifcfg-ens192
+
+            - name: Disable IPv6
+              replace:
+                      path: /etc/sysconfig/network-scripts/{{ item }}
+                      regexp: '^IPV6.*'
+                      replace: '#'
+              with_items:
+                      - ifcfg-bond0
+                      - ifcfg-bondc
+                      - ifcfg-ens192
+    tags: network
+    ignore_errors: yes
+    always:
+            - name: Restart Network
+              service:
+                    name: NetworkManager
+                    state: started
+                    enabled: yes
+
+### 05 registry #-----------------------------------------------------------------
+  - name: Registry
+    block:
+            - name: Backup Registries.conf
+              shell:
+                      cmd: mv /etc/containers/registries.conf /etc/containers/registries.conf-old
+            - name: Replace Registries.conf
+              copy:
+                      src: /home/ansible/common_config/registries.conf
+                      dest: /etc/containers/
+                      owner: root
+                      group: root
+                      mode: '0755'
+                      remote_src: no
+    ignore_errors: yes
+    tags: registry
+#             ---------------------------------------------------------
+  - name: Zabbix
+    block:
+            - name: copy Zabbix agent to remote servers
+              copy:
+                      src: /home/ansible/common_config/zabbixagent.tar
+                      dest: /home/ansible/
+                      remote_src: no
+                      owner: root
+                      group: root
+                      mode: '0644'
+            - name: Podman Load Zabbix Agent
+              shell:
+                      cmd: podman load -i /home/ansible/zabbixagent.tar
+            - name: Run Zabbix Agent command
+              shell:
+                      cmd: podman run --name zabbix-agent --ip {{ zbx_address }} -e ZBX_HOSTNAME={{ hostName }} -e ZBX_SERVER_HOST=172.18.27.5,10.88.0.1,10.88.0.2 --network=podman -p 10050:10050 -d artifactory.idm.mci.ir/docker.io/zabbix/zabbix-agent:latest
+    tags: zabbix
+    ignore_errors: yes
+#             ---------------------------------------------------------
+  - name: Podman
+    block:
+            - name: Podman Pull {{ podman_pull[0] }}
+              shell:
+                      cmd: podman pull {{podman_url}}/{{ podman_pull[0] }}
+
+            - name: Podman Pull {{ podman_pull[1] }}
+              shell:
+                      cmd: podman pull {{podman_url}}/{{ podman_pull[1] }}
+#            ----------------------------------------------------------------------------
+            - name: Podman TAG  {{ podman_pull[0] }}
+              shell:
+                      cmd: podman tag  {{podman_url}}/{{ podman_pull[0] }} {{podman_tag[0]}}
+            - name: Podman TAG {{ podman_pull[1] }}
+              shell:
+                      cmd: podman tag {{podman_url}}/{{ podman_pull[1] }} {{podman_tag[1]}}
+
+            - name: Podman Images Output
+              shell:
+                      cmd: podman images
+              register: command_output
+            - debug:
+                    var: command_output.stdout_lines
+    tags: podman
+    ignore_errors: yes
+
+### pmp config #---------------------------------------------------------
+  - name: PMP
+    block:
+            - name: copy PMP file to remote servers
+              copy:
+                    src: /home/ansible/common_config/pmp-configuration-2.tar
+                    dest: /tmp
+                    remote_src: no
+                    owner: root
+                    group: root
+
+            - name: Untar pmp configuration
+              shell:
+                      cmd: |
+                              tar -C / -xvf /tmp/pmp-configuration-2.tar
+                              chmod a+x /tmp/pmp-configuration/pmp-mci.sh
+                              chown ansible:ansible /tmp/pmp-configuration/pmp*
+
+            - name: Run Shell
+              shell:
+                      cmd: echo "yes" | /tmp/pmp-configuration/pmp-mci.sh
+              register: pmp_output
+    ignore_errors: yes
+    tags: pmp
+
+### xoroux #-----------------------------------------------------------------
+  - name: xoroux
+    block:
+            - name: copy lpar2rrd agent to remote server
+              copy:
+                    src: /home/ansible/common_config/lpar2rrd-agent-7.50-0.noarch.rpm
+                    dest: /home/ansible/
+                    remote_src: no
+                    owner: root
+                    group: root
+                    mode: '0644'
+
+            - name: lpar2rrd package directory
+              shell:
+                      cmd: cd /home/ansible
+            - name: Local install lpar2rrd
+              shell:
+                      cmd: yum localinstall lpar2rrd-agent-7.50-0.noarch.rpm -y
+            - name: configure lpar2rrd
+              shell:
+                      cmd: perl /opt/lpar2rrd-agent/lpar2rrd-agent.pl -d 172.20.29.198
+    ignore_errors: yes
+    tags: xoroux
+
+#### disply message #----------------------------------------
+  - name: display message
+    block:
+            - name: Check repo
+              shell:
+                      cmd: yum repolist
+              register: yum_output
+
+            - name: Check tzdata version
+              shell:
+                      cmd: rpm -qa | grep tzdata
+              register: tzdata
+
+            - name: check chrony
+              shell:
+                      cmd: chronyc sources
+              register: chrony_output
+
+            - name: check interface names
+              shell:
+                      cmd: nmcli device status
+              register: nmcli_output
+              tags: nmcli
+
+            - name: Check Disks
+              shell:
+                      cmd: lsblk
+              register: disk_output
+              tags: lsblk
+
+### show debug info #-----------------------------------
+            - debug:
+                    var: yum_output.stdout_lines
+            - debug:
+                    var: pmp_output.stdout_lines
+            - debug:
+                    var: tzdata.stdout_lines
+            - debug:
+                    var: chrony_output.stdout_lines
+            - debug:
+                    var: disk_output.stdout_lines
+              tags: lsblk
+
+            - debug:
+                    var: nmcli_output.stdout_lines
+              tags: nmcli
+
+            - name: display message
+              run_once: yes
+              debug:
+                      msg:
+                              - 'Things must to do: '
+                              - '- Cluster is ready for bootstrap configuration'
+                              - '- all disks must start from sda'
+                              - '- all disks must be in order'
+    tags: info
+
+### next part #------------------------------------------------------

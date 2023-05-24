@@ -1,0 +1,129 @@
+---
+- hosts: ilo-esxi
+  become: yes
+  gather_facts: no
+  vars:
+          - ansible_python_interpreter: /usr/bin/python3
+          - ansible_host_key_checking: no
+          - validate_certs: no
+  tasks:
+  - name: Block Installation ESXI using ISO file
+    block:
+            - name: Mounting source directory from official ESXi ISO
+              shell: |
+                      mkdir /mnt/{{ item.hostName }}
+                      mount -o loop -t iso9660 /var/deploy/isosrc/{{ src_iso_file }} /mnt/{{ item.hostName }}/
+                      mkdir /var/deploy/baremetal/{{ item.hostName }}
+                      cp -avRf /mnt/{{ item.hostName }}/* /var/deploy/baremetal/{{ item.hostName }}/
+                      umount /mnt/{{ item.hostName }}
+                      rm -f /var/deploy/baremetal/{{ item.hostName }}/boot.cfg
+                      rm -f /var/deploy/baremetal/{{ item.hostName }}/efi/boot/boot.cfg
+              with_items:
+                      - "{{ esxihosts }}"
+
+            - name: Copying custom boot.cfg to root directory for UEFI
+              copy:
+                      src: /home/ansible/common_config/BOOT.CFG
+                      dest: /var/deploy/baremetal/{{ item.hostName }}/
+                      remote_src: no
+                      owner: root
+                      group: root
+                      mode: '0744'
+              with_items:
+                      - "{{ esxihosts }}"
+                        
+            - name: Copying custom boot.cfg to root directory for UEFI
+              copy:
+                      src: /home/ansible/common_config/BOOT.CFG
+                      dest: /var/deploy/baremetal/{{ item.hostName }}/efi/boot/
+                      remote_src: no
+                      owner: root
+                      group: root
+                      mode: '0744'
+              with_items:
+                      - "{{ esxihosts }}"
+
+            - name: Creating kickstart file with proper automation contents
+              copy:
+                      force: yes
+                      dest: /var/deploy/baremetal/{{ item.hostName }}/KS.CFG
+                      content: |
+                              vmaccepteula
+                              clearpart --firstdisk=local --overwritevmfs
+                              install --firstdisk=local --overwritevmfs
+                              rootpw {{ root_password }}
+                              network --bootproto=static --addvmportgroup=1 --vlanid={{ global_vlan_id }} --ip={{ item.esxi_ip }} --netmask={{ global_netmask }} --gateway={{ global_gw }} --nameserver={{ global_dns1 }} --hostname={{ item.hostName }}
+                              %firstboot --interpreter=busybox
+                              vim-cmd hostsvc/enable_ssh
+                              vim-cmd hostsvc/start_ssh
+                              vim-cmd hostsvc/enable_esx_shell
+                              vim-cmd hostsvc/start_esx_shell
+                              esxcli system module parameters set -m tcpip6 -p ipv6=0
+                              esxcli network ip set --ipv6-enabled=false
+                              esxcli system ntp set --server={{ global_ntp1 }} --server={{ global_ntp2 }}
+                              esxcli network ip dns server add --server={{ global_dns2 }}
+                              esxcli system ntp set --enabled=true
+                              esxcli system ntp start
+                              #esxcli system settings advanced set -o /UserVars/HostClientCEIPEnabled -i 0
+                              reboot 
+              with_items:
+                      - "{{ esxihosts }}"
+
+            - name: Scripting commands to tarball the kickstart file
+              shell:
+                      cmd: cd /var/deploy/baremetal/{{ item.hostName }}/
+              with_items:
+                      - "{{ esxihosts }}"
+
+            - name: Generate bootable iso from all files
+              shell: >
+                      mkisofs
+                      -relaxed-filenames
+                      -J
+                      -R
+                      -b isolinux.bin
+                      -c boot.cat
+                      -no-emul-boot
+                      -boot-load-size 4
+                      -boot-info-table
+                      -eltorito-alt-boot
+                      -e efiboot.img
+                      -boot-load-size 1
+                      -no-emul-boot
+                      -o /var/deploy/baremetal/{{ item.hostName }}.iso
+                      /var/deploy/baremetal/{{ item.hostName }}/
+              with_items:
+                      - "{{ esxihosts }}"
+
+            - name: Move created iso to target path         
+              shell:
+                      cmd: mv /var/deploy/baremetal/{{ item.hostName }}.iso /var/deploy/stageiso/
+              with_items:
+                      - "{{ esxihosts }}"
+
+            - name: Deleting all related files except created iso file
+              shell: |
+                      rm -rf /var/deploy/baremetal/{{ item.hostName }}
+                      rm -rf /mnt/*
+              with_items:
+                      - "{{ esxihosts }}"
+    tags: iso
+
+  - name: Block Using ILO to deploy iso
+    block:
+            - name: Using HPE iLO to {{ ilo_state }} target physical servers
+              hpilo_boot:
+                      host: "{{ item.ilo_ip }}"
+                      login: "{{ ilo_user }}"
+                      password: "{{ ilo_pass }}"
+                      state: "{{ ilo_state }}"
+                      media: cdrom
+                      image: http://192.168.255.16/update/{{ item.hostName }}.iso
+              delegate_to: localhost
+              with_items:
+                      - "{{ esxihosts }}"
+    tags: ilo
+
+
+
+...

@@ -1,0 +1,13 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+# run after pmp
+          - name : lock Ansible User from targets
+            shell:
+                    cmd: sudo usermod -L -e 1 ansible
+            ignore_errors: yes
+
+
+

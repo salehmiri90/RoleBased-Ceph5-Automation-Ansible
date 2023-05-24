@@ -1,0 +1,18 @@
+---
+### host info ###
+hostName: kceph3-01
+ip: 10.156.199.111 
+
+### zabbix agent info ###
+zbx_address: 10.88.0.128
+
+### bondc cluster (interconnect) info ###
+bondc_ipv4: 10.110.11.111/24
+bondc_slave:
+  - connamec: bondc-port1
+    ifnamec: ens5f0
+  - connamec: bondc-port2
+    ifnamec: ens5f1
+
+### 
+

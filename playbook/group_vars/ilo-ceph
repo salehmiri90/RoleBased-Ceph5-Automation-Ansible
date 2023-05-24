@@ -1,0 +1,17 @@
+---
+###### Group Vars for ILO Provisioning ########
+###### Ceph Cluster info
+global_netmask: 255.255.255.0
+global_gw: 10.19.75.254
+global_dns1: 172.17.58.97
+global_dns2: 172.17.58.98
+
+###### HPE ILO info
+ilo_user: ceph
+ilo_pass: C3ph@123
+ilo_state: boot_once
+
+###### Path on Ansible-ISO Middle server
+src_iso_file: ceph-rhel86.iso
+
+

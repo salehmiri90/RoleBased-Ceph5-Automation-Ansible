@@ -1,0 +1,100 @@
+####### READ ME #####
+# use --limit to define specific hosts
+# please complete hostvars and groupvars based on cluster
+# run this file for bootstrap
+# run on only ((( MON1 )))
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+  - name: block packages 
+    block:
+            - name: Install CephADM Packages
+              yum:
+                      name:
+                              - cephadm
+                      state: present
+           
+            - name: Backup Cephadm
+              shell:
+                      cmd: mv /usr/sbin/cephadm /usr/sbin/cephadm-bkp
+
+            - name: Copy new Cephadm file
+              copy:
+                      src: /home/ansible/common_config/cephadm
+                      dest: /usr/sbin/
+                      owner: root
+                      group: root
+                      mode: '0755'
+                      remote_src: no
+    ignore_errors: no
+    tags: packages
+
+### bootstrap on MON1 #-----------------------------------------------------------
+#  - name: bootstrap
+#   block:
+#           - name: bootstrap on MON1
+#             shell:
+#                     cmd: cephadm bootstrap --mon-ip {{ mon1_ip }} {{ bootstrap_options }}
+
+### After bootstrap only on MON1 #-------------------------------------------------
+  - name: block osd files
+    block:
+            - name: Copy osd_spec files
+              copy:
+                      src: "{{ item }}"
+                      dest: /var/lib/ceph/osd/
+                      remote_src: no
+              with_fileglob:
+                      - /home/ansible/osd_spec/*
+    tags: osd
+
+### SMTP config for MON1------------------------------------------------------------------
+  - name: block smtp
+    block:
+            - name: set alert enable
+              shell:
+                      cmd: ceph mgr module enable alerts
+  
+            - name: set SMTP host
+              shell:
+                      cmd: ceph config set mgr mgr/alerts/smtp_host "bulkmail.mci.ir" --force
+
+            - name: set SMTP destination
+              shell:
+                      cmd: ceph config set mgr mgr/alerts/smtp_destination storage-team@mci.ir
+
+            - name: set SMTP sender
+              shell:
+                      cmd: ceph config set mgr mgr/alerts/smtp_sender {{ clustername }}@noreply.mci.ir
+
+            - name: set email subject
+              shell:
+                      cmd: ceph config set mgr mgr/alerts/smtp_from_name "Ceph Cluster {{ clustername }}"
+
+            - name: disable SSL on SMTP
+              shell:
+                      cmd: ceph config set mgr mgr/alerts/smtp_ssl false
+
+            - name: set SMTP port 25
+              shell:
+                      cmd: ceph config set mgr mgr/alerts/smtp_port 25
+
+            - name: Send a test alert
+              shell:
+                      cmd: ceph alerts send
+ 
+            - name: display messag
+              run_once: yes
+              debug:
+                    msg:
+                            - 'Things need to check: '
+                            - '- Plz check your email address: storage-team@mci.ir'
+                            - '- You must recieve an email from {{ clustername }}@noreply.mci.ir' 
+                            - '- Email Subject: Ceph Cluster {{ clustername }} '
+    tags: smtp
+    ignore_errors: yes
+
+
+...

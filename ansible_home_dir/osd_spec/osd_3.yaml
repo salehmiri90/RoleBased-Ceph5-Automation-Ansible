@@ -1,0 +1,12 @@
+service_type: osd
+service_id: osd_using_paths
+placement:
+  hosts:
+    - kceph2-01
+data_devices:
+  paths:
+    - /dev/ceph-block-3/block3
+db_devices:
+  paths:
+    - /dev/ceph-db/db3
+

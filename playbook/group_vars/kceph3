@@ -1,0 +1,30 @@
+---
+clustername: kceph3
+mon1_ip: 
+####### key info in string type####
+ceph_pub: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC2ZYi2+GjphFq8+mpvzbMHD1SAg2VIGgCBHHUCV5Uur3UAJ9j8ejqbd6buLS3HT9z0LwFczzs1AV0veHmE7VKPnCb1ThRrh3kfvNjrFLFc0k2RJ0OYZkYEe8r2TCHxvGCn6z/GGHS8+6DR932WhLLQ2YYv3rXQUaOkY0x1WNsdfXRLt16+unQot3KswDrpmMM/1o+VQ3mXqeAAVabvT/QnvnvsYvjzUevadEZ2mghV+OMqmvSMsdrRLtr3nQtlUDJORr03w2Q3yCWi0DgVTH3itszA7AEMHi3c1ok0bIOrINfOoJkQ+LpimeeRkRQFKQkyrWAUcYfmkVf+JQmrQfr9I4oze5sXpho7aiWPGECR58lmQR7Qnpb1mHxtgf1OwlM8P+aFWzqbYTRJik5RC03E55zO/PziQhFVVoIDSYVZ/DKOTtb53R/cRklchxkoaUVr32FaBW+lJmQi2wrFCCydV51Z38Nfu+O/sZpq2nCyhZyvmj90zG+WPxYuroKJSYc= ceph-34f729e8-ee61-11ed-9328-00505697a482 
+####### osd config ####
+data_disk_qty: 8
+first_disk: 0
+last_disk: 7
+db_disk: 
+wal_size:
+disks:
+  - name: nvme0n1
+    num: 1
+  - name: nvme1n1
+    num: 2
+  - name: nvme2n1
+    num: 3
+  - name: nvme3n1
+    num: 4
+  - name: nvme4n1
+    num: 5
+  - name: nvme5n1
+    num: 6
+  - name: nvme6n1
+    num: 7
+  - name: nvme7n1
+    num: 8
+
+

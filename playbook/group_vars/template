@@ -1,0 +1,31 @@
+---
+clustername: template
+mon1_ip: 
+####### key info in string type####
+ceph_pub: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDds/C7ItpgREugyC5bYB
+bootstrap_options: 
+####### osd config ####
+data_disk_qty: 8
+first_disk: a
+last_disk: h
+db_disk: sdj
+wal_size: 200G
+disks:
+  - name: sda
+    num: 1
+  - name: sdb
+    num: 2
+  - name: sdc
+    num: 3
+  - name: sdd
+    num: 4
+  - name: sde
+    num: 5
+  - name: sdf
+    num: 6
+  - name: sdg
+    num: 7
+  - name: sdh
+    num: 8
+
+

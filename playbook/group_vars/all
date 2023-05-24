@@ -1,0 +1,60 @@
+---
+### Packages ###
+basic_packages:
+  - telnet
+  - vim
+  - perl
+  - tzdata
+  - chrony
+  - attr
+
+ceph_packages:
+  - lvm2
+  - python3
+  - ceph-common
+  - ceph-osd
+
+
+### subscription ###
+org_id: Default_Organization
+activationkey: Ceph-5
+
+### Katello ###
+katello_url: http://172.17.53.6/pub/katello-ca-consumer-latest.noarch.rpm
+
+### Source file Path ###
+rpm-repo:
+  - /home/ansible/common_config/rpm.repo
+
+### Podman ###
+podman_url: artifactory.idm.mci.ir:5000
+podman_pull:
+  - rhceph-5-rhel8
+  - ose-prometheus-node-exporter:v4.6
+  - ose-prometheus-alertmanager:v4.6
+  - ose-prometheus:v4.6
+  - rhceph-5-dashboard-rhel8
+
+podman_tag:
+  - registry.redhat.io/rhceph/rhceph-5-rhel8
+  - registry.redhat.io/openshift4/ose-prometheus-node-exporter:v4.6
+  - registry.redhat.io/openshift4/ose-prometheus-alertmanager:v4.6
+  - registry.redhat.io/openshift4/ose-prometheus:v4.6
+  - registry.redhat.io/rhceph/rhceph-5-dashboard-rhel8
+
+### NTP servers ###
+ntp_babaei:
+  - 10.115.11.129
+  - 10.115.11.130
+ntp_kazemian:
+  - 10.156.65.193
+  - 10.156.65.194
+ntp_tohid:
+  - 172.20.20.33
+  - 172.20.20.34
+
+
+
+
+
+

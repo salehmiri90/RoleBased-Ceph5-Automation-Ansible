@@ -1,0 +1,42 @@
+---
+- hosts: all
+  become: yes
+# use --limit to define specific hosts
+  gather_facts: no
+  tasks:
+# run before bootstrap
+  - name: remove subs
+    block:
+            - name: modify hosts /etc/hosts
+              shell:
+                      cmd: sudo echo "172.17.53.6     redhat-satellite.mcci.local     redhat-satellite" >> /etc/hosts
+            - name: unregister
+              shell:
+                      cmd: subscription-manager unregister
+            - name: clean rpm
+              shell:
+                      cmd: subscription-manager clean
+            - name: remove katello
+              shell:
+                      cmd: yum remove -y katello-ca-consumer-satellite.idm.mci.ir-1.0-2.noarch
+    ignore_errors: yes
+    tags: delsubs
+
+
+  - name: Subscription to redhat
+    block:
+
+            - name: install katello rpm
+              shell:
+                      cmd: rpm -Uvh {{ katello_url }}
+
+            - name: subscribe to redhat
+              redhat_subscription:
+                      state: present
+                      org_id: "{{ org_id }}"
+                      activationkey: "{{ activationkey }}"
+    ignore_errors: yes
+    tags: subs
+
+
+...
