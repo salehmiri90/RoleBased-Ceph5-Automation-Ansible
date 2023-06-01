@@ -1,0 +1,27 @@
+---
+
+- name: Interfaces Onboot Yes
+  replace:
+          path: /etc/sysconfig/network-scripts/{{ item }}
+          regexp: '^ONBOOT=no'
+          replace: 'ONBOOT=yes'
+  with_items:
+          - ifcfg-bond0
+          - ifcfg-bondc
+          - ifcfg-ens192
+
+- name: Disable IPv6
+  replace:
+          path: /etc/sysconfig/network-scripts/{{ item }}
+          regexp: '^IPV6.*'
+          replace: '#'
+  with_items:
+          - ifcfg-bond0
+          - ifcfg-bondc
+          - ifcfg-ens192
+
+- name: Restart Network
+  service:
+        name: NetworkManager
+        state: started
+        enabled: yes

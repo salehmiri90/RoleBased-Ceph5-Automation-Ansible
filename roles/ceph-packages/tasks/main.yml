@@ -1,0 +1,8 @@
+---
+
+- name: Install Ceph Packages include {{ ceph_packages }}
+  yum:
+          name: "{{ item }}"
+          state: present
+          update_cache: yes
+  loop: "{{ ceph_packages }}"

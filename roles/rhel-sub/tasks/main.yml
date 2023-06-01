@@ -1,0 +1,16 @@
+---
+
+- name: Modify hosts /etc/hosts
+  shell:
+          cmd: sudo echo "1.7.13.65     satellite.salehmiri.local     satellite" >> /etc/hosts
+
+- name: Install Katello RPM
+  shell:
+          cmd: rpm -Uvh {{ katello_url }}
+
+- name: Subscribe to Redhat
+  redhat_subscription:
+          state: present
+          org_id: "{{ org_id }}"
+          activationkey: "{{ activationkey }}"
+  when: ansible_distribution == 'RedHat'

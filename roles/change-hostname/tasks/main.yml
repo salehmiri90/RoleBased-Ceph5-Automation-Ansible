@@ -1,0 +1,5 @@
+---
+
+- name: Set Proper Hostname
+  hostname:
+          name: "{{ hostName }}"

@@ -1,0 +1,11 @@
+---
+
+file_path: /home/deploy/baremetal
+
+### Create LVM for 600GB Disk, modify as you want
+#Number's value are MegaByte (MB)
+pv01_size: 79876        
+pv02_size: 490504
+root_size: 51200
+home_size: 20480
+var_size: 490496

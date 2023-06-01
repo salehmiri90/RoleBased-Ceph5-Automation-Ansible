@@ -1,0 +1,22 @@
+---
+
+- name: copy lpar2rrd agent to remote server
+  copy:
+        src: lpar2rrd-agent-7.30-0.noarch.rpm
+        dest: /home/ansible/
+        remote_src: no
+        owner: root
+        group: root
+        mode: '0644'
+
+- name: lpar2rrd package directory
+  shell:
+          cmd: cd /home/ansible
+
+- name: Local install lpar2rrd
+  shell:
+          cmd: yum localinstall lpar2rrd-agent-7.30-0.noarch.rpm -y
+
+- name: configure lpar2rrd
+  shell:
+          cmd: perl /opt/lpar2rrd-agent/lpar2rrd-agent.pl -d 1.169.12.18

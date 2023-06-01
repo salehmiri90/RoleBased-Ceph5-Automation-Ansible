@@ -1,0 +1,9 @@
+---
+
+- name: Install Initial {{ basic_packages }} Packages
+  yum:
+          name: "{{ item }}"
+          state: latest
+          update_cache: yes
+  loop: "{{ basic_packages }}"
+

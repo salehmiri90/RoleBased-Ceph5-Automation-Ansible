@@ -1,0 +1,9 @@
+#A. run below command to replace each hosts in the mentioned files
+#sed -i 's/kceph2-06/kceph2-07/g' *
+
+#B. check the configs changed
+#grep kceph2 -nr
+
+#C. Run below to apply osds
+# for i in {1..8}; do  ceph orch apply -i osd_$i.yaml ; sleep 30 ; ceph osd tree ; echo "---------------------------------------------"; done
+ 

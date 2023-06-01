@@ -1,0 +1,18 @@
+---
+
+- name: copy Zabbix agent to remote servers
+  copy:
+          src: zabbixagent.tar
+          dest: /home/ansible/
+          remote_src: no
+          owner: root
+          group: root
+          mode: '0644'
+
+- name: Podman Load Zabbix Agent
+  shell:
+          cmd: podman load -i /home/ansible/zabbixagent.tar
+
+- name: Run Zabbix Agent command
+  shell:
+          cmd: podman run --name zabbix-agent --ip {{ zbx_address }} -e ZBX_HOSTNAME={{ hostName }} -e ZBX_SERVER_HOST=1.8.0.157 --network=podman -p 1040:1040 -d artifactory.saleh.miri.local/docker.io/zabbix/zabbix-agent:latest

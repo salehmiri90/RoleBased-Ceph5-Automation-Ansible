@@ -1,0 +1,42 @@
+---
+
+- name: set alert enable
+  shell:
+          cmd: ceph mgr module enable alerts
+
+- name: set SMTP host
+  shell:
+          cmd: ceph config set mgr mgr/alerts/smtp_host "bulkmail.salehmiri.local" --force
+
+- name: set SMTP destination
+  shell:
+          cmd: ceph config set mgr mgr/alerts/smtp_destination noc@salehmiri.local
+
+- name: set SMTP sender
+  shell:
+          cmd: ceph config set mgr mgr/alerts/smtp_sender {{ clustername }}@noreply.salehmiri.local
+
+- name: set email subject
+  shell:
+          cmd: ceph config set mgr mgr/alerts/smtp_from_name "Ceph Cluster {{ clustername }}"
+
+- name: disable SSL on SMTP
+  shell:
+          cmd: ceph config set mgr mgr/alerts/smtp_ssl false
+
+- name: set SMTP port 25
+  shell:
+          cmd: ceph config set mgr mgr/alerts/smtp_port 25
+
+- name: Send a test alert
+  shell:
+          cmd: ceph alerts send
+
+- name: display messag
+  run_once: yes
+  debug:
+        msg:
+                - 'Things need to check: '
+                - '- Plz check your email address: noc@salehmiri.local'
+                - '- You must recieve an email from {{ clustername }}@noreply.salehmiri.local'
+                - '- Email Subject: Ceph Cluster {{ clustername }} '

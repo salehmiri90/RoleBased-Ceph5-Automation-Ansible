@@ -1,0 +1,33 @@
+---
+
+- name: create bondc for cluster (interconnect) network
+  community.general.nmcli:
+          type: bond
+          conn_name: bondc
+          ip4: "{{ bondc_ipv4 }}"
+          mode: '802.3ad'
+          state: present
+  with_items:
+          - "{{ bondc_slave }}"
+
+- name: slave bond cluster
+  community.general.nmcli:
+          type: bond-slave
+          conn_name: "{{ item.connamec }}"
+          ifname: "{{ item.ifnamec }}"
+          master: 'bondc'
+          state: present
+  with_items:
+          - "{{ bondc_slave }}"
+
+- name: Disable Bondc IPv6
+  shell:
+          cmd: nmcli connection modify bondc ipv6.method disabled
+
+- name: set method manual
+  shell:
+          cmd: nmcli con mod bondc ipv4.method manual
+
+- name: ifup bond private
+  shell:
+          cmd: nmcli con up bondc

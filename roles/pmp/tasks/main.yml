@@ -1,0 +1,24 @@
+---
+
+- name: copy PMP file to remote servers
+  copy:
+        src: pmp-configuration-2.tar
+        dest: /tmp
+        remote_src: no
+        owner: root
+        group: root
+
+- name: Untar pmp configuration
+  shell:
+          cmd: |
+                  tar -C / -xvf /tmp/pmp-configuration-2.tar
+                  chmod a+x /tmp/pmp-configuration/pmp.sh
+                  chown ansible:ansible /tmp/pmp-configuration/pmp*
+
+- name: Run Shell
+  shell:
+          cmd: echo "yes" | /tmp/pmp-configuration/pmp.sh
+  register: pmp_output
+
+- debug:
+        var: pmp_output.stdout_lines

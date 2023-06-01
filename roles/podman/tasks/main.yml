@@ -1,0 +1,16 @@
+---
+
+- name: Podman Pull {{ podman_pull[0] }}
+  shell:
+          cmd: podman pull {{podman_url}}/{{ podman_pull[0] }}
+
+- name: Podman Pull {{ podman_pull[1] }}
+  shell:
+          cmd: podman pull {{podman_url}}/{{ podman_pull[1] }}
+#-----------------------------------------------------------------------------
+- name: Podman TAG  {{ podman_pull[0] }}
+  shell:
+          cmd: podman tag  {{podman_url}}/{{ podman_pull[0] }} {{podman_tag[0]}}
+- name: Podman TAG {{ podman_pull[1] }}
+  shell:
+          cmd: podman tag {{podman_url}}/{{ podman_pull[1] }} {{podman_tag[1]}}

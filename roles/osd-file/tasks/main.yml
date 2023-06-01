@@ -1,0 +1,9 @@
+---
+
+- name: Copy osd_spec files
+  copy:
+          src: "{{ item }}"
+          dest: /var/lib/ceph/osd/
+          remote_src: no
+  with_fileglob:
+          - osd_spec/*

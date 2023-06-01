@@ -1,0 +1,55 @@
+---
+
+- name: Check repo
+  shell:
+          cmd: yum repolist
+  register: yum_output
+
+- name: Check tzdata version
+  shell:
+          cmd: rpm -qa | grep tzdata
+  register: tzdata
+
+- name: check chrony
+  shell:
+          cmd: chronyc sources
+  register: chrony_output
+
+- name: check podman images
+  shell:
+          cmd: podman images
+  register: podman_output
+
+- name: Check Disks
+  shell:
+          cmd: lsblk
+  register: disk_output
+  tags: lsblk
+  
+- name: check interface names
+  shell:
+          cmd: nmcli device status
+  register: nmcli_output
+  tags: nmcli
+
+### show debug info #
+- debug:
+        var: yum_output.stdout_lines
+
+- debug:
+        var: tzdata.stdout_lines
+
+- debug:
+        var: chrony_output.stdout_lines
+
+- debug:
+        var: podman_output.stdout_lines
+
+- debug:
+        var: disk_output.stdout_lines
+  tags: lsblk
+
+- debug:
+        var: nmcli_output.stdout_lines
+  tags: nmcli
+

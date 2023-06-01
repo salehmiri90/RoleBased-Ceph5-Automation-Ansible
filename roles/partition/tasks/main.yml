@@ -1,0 +1,30 @@
+---
+
+- name: pvcreate
+  shell:
+          cmd: pvcreate /dev/sd[{{ first_disk }}-{{ last_disk }}]
+  shell:
+          cmd: pvcreate /dev/{{ db_disk }}
+
+- name: vgcreate Ceph Blocks
+  shell:
+          cmd: vgcreate ceph-block-{{ item.num }} /dev/{{ item.name }}
+  with_items:
+          - "{{ disks }}"
+- name: vgcreate CephDB
+  shell:
+          cmd: vgcreate ceph-db /dev/{{ db_disk }}
+- name: lvcreate Ceph Blocks
+  shell:
+          cmd: for i in {1..{{data_disk_qty}}}; do  lvcreate ceph-block-$i -l 100%FREE -n block$i; done
+
+- name: lvcreate Ceph DB
+  shell:
+          cmd: for i in {1..{{data_disk_qty}}}; do lvcreate ceph-db -L {{ wal_size }} -n db$i; done
+
+- name: LSBLK Output
+  shell:
+          cmd: lsblk
+  register: lsblk_output
+- debug:
+        var: lsblk_output.stdout_lines

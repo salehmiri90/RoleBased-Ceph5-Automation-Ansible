@@ -1,0 +1,11 @@
+---
+
+- name: Replace Registries.conf
+  template:
+          src: registries.j2
+          dest: /etc/containers/registries.conf
+          backup: yes
+          owner: root
+          group: root
+          mode: '0755'
+          remote_src: no

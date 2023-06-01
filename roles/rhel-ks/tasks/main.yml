@@ -1,0 +1,49 @@
+---
+
+- name: Create Kickstart file for OSD Servers
+  copy:
+          force: yes
+          dest: /home/deploy/baremetal/{{ item.hostName }}/KS.CFG
+          content: |
+                  lang en_US
+                  keyboard us
+                  timezone Asia/City --utc
+                  rootpw --plaintext 'Miri@saleh'
+                  user --name=saleh --password='Miri@saleh'
+                  text
+                  cdrom
+                  bootloader --location=mbr --append="rhgb nofb quiet splash=quiet crashkernel=auto"
+                  zerombr
+                  clearpart --all --initlabel
+                  ignoredisk --only-use=sda
+                  part pv.01 --fstype="lvmpv" --ondisk=sda --size={{pv01_size}}
+                  part pv.02 --fstype="lvmpv" --ondisk=sda --size={{pv02_size}}
+                  part /boot/efi --fstype="efi" --ondisk=sda --size=600 --fsoptions="umask=0077,shortname=winnt"
+                  part /boot --fstype="xfs" --ondisk=sda --size=1024
+                  volgroup rhel --pesize=4096 pv.01
+                  volgroup vardata --pesize=4096 pv.02
+                  logvol / --vgname=rhel --name=root --fstype=xfs --size={{root_size}}
+                  logvol swap --vgname=rhel --name=swap --fstype=swap --size=8192
+                  logvol /home --vgname=rhel --name=home --fstype=xfs --size={{home_size}}
+                  logvol /var --vgname=vardata --name=vardata --fstype=xfs --size={{var_size}}
+                  network --device=bond0 --bondslaves={{ item.bond0slaves1 }},{{ item.bond0slaves2 }} --bondopts=mode=802.3ad --hostname={{ item.hostName}} --bootproto=static --ip={{ item.bond0_ip }} --netmask={{ global_netmask }} --gateway={{ global_gw }} --nameserver={{ global_dns1 }},{{ global_dns2 }} --onboot=yes --activate
+                  skipx
+                  firstboot --disable
+                  selinux --enforcing
+                  firewall --enabled --ssh
+                  %packages
+                  @^minimal-environment
+                  @container-management
+                  @security-tools
+                  telnet
+                  perl
+                  vim
+                  chrony
+                  wget
+                  tzdata
+                  %end
+                  reboot
+  with_items:
+          - "{{ hosts }}"
+
+

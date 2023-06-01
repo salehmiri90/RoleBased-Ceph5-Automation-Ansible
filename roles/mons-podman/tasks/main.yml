@@ -1,0 +1,28 @@
+---
+
+- name: Podman Pull {{ podman_pull[2] }}
+  shell:
+          cmd: podman pull {{podman_url}}/{{ podman_pull[2] }}
+- name: Podman Pull {{ podman_pull[3] }}
+  shell:
+          cmd: podman pull {{podman_url}}/{{ podman_pull[3] }}
+- name: Podman Pull {{ podman_pull[4] }}
+  shell:
+          cmd: podman pull {{podman_url}}/{{ podman_pull[4] }}
+#---------------------------------------------------------------------------
+- name: Podman TAG {{ podman_pull[2] }}
+  shell:
+          cmd: podman tag {{podman_url}}/{{ podman_pull[2] }} {{podman_tag[2]}}
+- name: Podman TAG {{ podman_pull[3] }}
+  shell:
+          cmd: podman tag {{podman_url}}/{{ podman_pull[3] }} {{podman_tag[3]}}
+- name: Podman TAG {{ podman_pull[4] }}
+  shell:
+          cmd: podman tag {{podman_url}}/{{ podman_pull[4] }} {{podman_tag[4]}}
+#---------------------------------------------------------------------------
+- name: Podman Images Output
+  shell:
+          cmd: podman images
+  register: mons-podman_output
+- debug:
+        var: mons-podman_output.stdout_lines

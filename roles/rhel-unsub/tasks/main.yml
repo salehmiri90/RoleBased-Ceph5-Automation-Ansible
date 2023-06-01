@@ -1,0 +1,13 @@
+---
+
+- name: unregister
+  shell:
+          cmd: subscription-manager unregister
+
+- name: clean rpm
+  shell:
+          cmd: subscription-manager clean
+
+- name: remove katello
+  shell:
+          cmd: yum remove -y katello-ca-consumer-satellite.saleh.miri.local-1.0-2.noarch
