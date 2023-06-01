@@ -1,5 +1,5 @@
 ---
-cephhosts:
+hosts:
   - hostName: ceph23-01
     bond0_ip: 1.9.150.11
     bond0slaves1: ens3np0
