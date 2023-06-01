@@ -56,13 +56,13 @@ from pathlib import Path
 # ------------------------------------------------------------------------------
 
 
-DEFAULT_IMAGE = 'artifactory.idm.mci.ir:5000/rhceph-5-rhel8:latest'
+DEFAULT_IMAGE = 'artifactory.saleh.miri.local:10400/rhceph-5-rhel8:latest'
 DEFAULT_IMAGE_IS_MASTER = False
 DEFAULT_IMAGE_RELEASE = 'pacific'
-DEFAULT_PROMETHEUS_IMAGE = "artifactory.idm.mci.ir:5000/ose-prometheus:v4.6"
-DEFAULT_NODE_EXPORTER_IMAGE = "artifactory.idm.mci.ir:5000/ose-prometheus-node-exporter:v4.6"
-DEFAULT_GRAFANA_IMAGE = "artifactory.idm.mci.ir:5000/rhceph-5-dashboard-rhel8:latest"
-DEFAULT_ALERT_MANAGER_IMAGE = "artifactory.idm.mci.ir:5000/ose-prometheus-alertmanager:v4.6"
+DEFAULT_PROMETHEUS_IMAGE = "artifactory.saleh.miri.local:10400/ose-prometheus:v4.6"
+DEFAULT_NODE_EXPORTER_IMAGE = "artifactory.saleh.miri.local:10400/ose-prometheus-node-exporter:v4.6"
+DEFAULT_GRAFANA_IMAGE = "artifactory.saleh.miri.local:10400/rhceph-5-dashboard-rhel8:latest"
+DEFAULT_ALERT_MANAGER_IMAGE = "artifactory.saleh.miri.local:10400/ose-prometheus-alertmanager:v4.6"
 
 
 
