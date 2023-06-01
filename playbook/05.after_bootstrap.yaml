@@ -5,20 +5,12 @@
 # run on all MONs 
 ---
 - hosts: all
-  become: yes
   gather_facts: no
   tasks:
 
 ### keys #------------------------------------------------------------------------------------
   - name: keyring
     block:
-            - name: display message
-              run_once: yes
-              debug:
-                      msg:
-                              - 'You need to put keyring and ceph.conf files in ansible directory'
-                              - '################################################################'
-
             - name: copy Ceph Keyring to MONs
               copy:
                     src: "{{ item }}"
@@ -32,7 +24,7 @@
                       - /home/ansible/{{ clustername }}/ceph.conf
     tags: monKeys
     ignore_errors: yes
-
+###-------------------------------------------------###
   - name: set ssh key on OSDs
     block:
             - name: set ssh authorized keys on OSDs
@@ -44,5 +36,6 @@
                       manage_dir: yes
     tags: osdKeys
     ignore_errors: yes
+###-------------------------------------------------###
 
 ...

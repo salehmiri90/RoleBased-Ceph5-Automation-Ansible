@@ -1,25 +1,28 @@
 ---
-- hosts: ilo-ceph
+- hosts: ilo-esxi
   gather_facts: no
   vars:
           - ansible_python_interpreter: /usr/bin/python3
           - ansible_host_key_checking: no
           - validate_certs: no
-
   tasks:
   - name: Block Generate ISO with KS file
     block:
-            - name: Mount Rhel8.6 ISO file and copy files
+            - name: Mount VMware ISO file and copy files
               include_role:
                       name: copy-iso-mount
 
-            - name: Create RHEL Kickstart file
+            - name: Copy Custome BOOT Files
               include_role:
-                      name: rhel-ks
+                      name: vm-custome-boot
+
+            - name: Generate Kickstart File
+              include_role:
+                      name: vm-ks
 
             - name: Generate ISO
               include_role:
-                      name: rhel-gen-iso
+                      name: vm-gen-iso
 
             - name: Make UEFI ISO
               include_role:

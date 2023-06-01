@@ -1,0 +1,14 @@
+####### READ ME #####
+# use --limit to define specific hosts
+# please complete hostvars and groupvars based on cluster
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+          - name: Remove Redhat Subscription
+            include_role:
+                    name: rhel-unsub
+###-------------------------------------------------###
+
+
+

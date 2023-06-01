@@ -1,0 +1,28 @@
+---
+- hosts: all
+  # use --limit to define specific hosts
+  become: yes
+  serial: 1
+  gather_facts: no
+  tasks:
+# run on all osds
+# run before bootstrap
+  - name: Disks
+    block:
+            - name: Check Disks
+              shell:
+                      cmd: lsblk
+              register: command_output
+            - debug:
+                    var: command_output.stdout_lines 
+#           --------------------------------------------------------------
+            - name: display message
+              run_once: yes
+              debug:
+                      msg:
+                              - 'Things need to check: '
+                              - '- all disks must start from sdb'
+                              - '- all disks must be in order'
+    tags: checkdisk
+
+...

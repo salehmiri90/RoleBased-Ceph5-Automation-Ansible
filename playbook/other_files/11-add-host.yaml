@@ -1,8 +1,6 @@
 ---
 - hosts: all
-  # only run inside of mon1
-  # do not run it from ansible server
-  # under develop by Saleh Miri
+  # only run in mon1
   gather_facts: yes
   become: yes
   tasks:

@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+          - name: remove bond
+            shell:
+                    cmd: nmcli con del bondc

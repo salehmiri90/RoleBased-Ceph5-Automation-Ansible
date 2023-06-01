@@ -1,5 +1,0 @@
-[ceph5]
-name = Red Hat Enterprise Linux 8 for x86_64 - CEPH5 (RPMs)
-baseurl = http://saleh.miri.local:1000/repository/ceph-5/
-enabled = 1
-gpgcheck = 0
